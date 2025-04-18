@@ -1,0 +1,13 @@
+package com.reflect.app.data.local
+
+// File: shared/src/commonMain/kotlin/com/reflect.app/data/local/dao/UserDao.kt
+
+import com.reflect.app.domain.model.User
+import kotlinx.coroutines.flow.Flow
+
+interface UserDao {
+    suspend fun saveUser(user: User)
+    suspend fun getUser(): User?
+    fun observeUser(): Flow<User?>
+    suspend fun clearCurrentUser()
+}

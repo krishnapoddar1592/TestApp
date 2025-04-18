@@ -1,0 +1,19 @@
+# Add the source line at the top - this is required
+source 'https://cdn.cocoapods.org'
+
+platform :ios, '14.0'
+
+target 'iosApp' do
+  use_frameworks!
+  
+  # KMP shared module
+  pod 'shared', :path => '../shared'
+  
+  # These Firebase dependencies need to be explicitly declared here
+  # *even though* they are already declared in your shared module
+  pod 'Firebase/Auth'
+  pod 'Firebase/Firestore'
+  
+  # Google Sign-In
+  pod 'GoogleSignIn'
+end
