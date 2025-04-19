@@ -18,7 +18,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         FirebaseApp.configure()
         
         // Initialize Koin
-//        KoinHelperKt.doInitKoin()
+        KoinHelper().doInitKoin()
         
         return true
     }

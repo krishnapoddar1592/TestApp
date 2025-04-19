@@ -1,19 +1,10 @@
-# Add the source line at the top - this is required
 source 'https://cdn.cocoapods.org'
-
 platform :ios, '14.0'
+use_frameworks!
 
 target 'iosApp' do
-  use_frameworks!
-  
-  # KMP shared module
-  pod 'shared', :path => '../shared'
-  
-  # These Firebase dependencies need to be explicitly declared here
-  # *even though* they are already declared in your shared module
-  pod 'Firebase/Auth'
-  pod 'Firebase/Firestore'
-  
-  # Google Sign-In
+  # Point at the Gradle‑generated podspec directory
+# pod 'shared', :path => '../shared' # ✅ Correct in Kotlin 2.0
+  pod 'shared', path: '../shared/build/cocoapods'
   pod 'GoogleSignIn'
 end

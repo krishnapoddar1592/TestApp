@@ -2,8 +2,12 @@
 package com.reflect.app.domain.model
 
 import kotlinx.serialization.Serializable
+import kotlin.experimental.ExperimentalObjCName
+import kotlin.native.ObjCName
 
 @Serializable
+@OptIn(ExperimentalObjCName::class)
+@ObjCName("User","User")
 data class User(
     val id: String,
     val email: String,
@@ -16,6 +20,8 @@ data class User(
 
 // Make sure SubscriptionType is also serializable
 @Serializable
+@OptIn(ExperimentalObjCName::class)
+@ObjCName("SubscriptionType","SubscriptionType")
 enum class SubscriptionType {
     FREE, TRIAL, PREMIUM
 }

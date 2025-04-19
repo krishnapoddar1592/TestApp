@@ -1,23 +1,20 @@
-
-
-// shared/src/iosMain/kotlin/com/reflect/app/data/remote/api/IosFirebaseAuth.kt
 package com.reflect.app.data.remote.api
 
 import com.reflect.app.domain.model.SubscriptionType
 import com.reflect.app.domain.model.User
-import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.datetime.Clock
+import platform.Foundation.NSNumber
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
-@OptIn(ExperimentalForeignApi::class)
 class IosFirebaseAuth : FirebaseAuthInterface {
 
     override suspend fun loginWithEmail(email: String, password: String): Result<User> {
-        return suspendCoroutine { continuation ->
+        return suspendCancellableCoroutine { continuation ->
             FirebaseAuthBridge().signInWithEmail(
                 email = email,
                 password = password
-            ) { userId, userEmail, displayName, error ->
+            ) { userId, userEmail, displayName, isVerified, error ->
                 if (error != null) {
                     continuation.resume(Result.failure(Exception(error)))
                 } else if (userId != null) {
@@ -25,10 +22,10 @@ class IosFirebaseAuth : FirebaseAuthInterface {
                         id = userId,
                         email = userEmail ?: "",
                         displayName = displayName,
-                        isEmailVerified = false, // We'll get this from the Swift bridge
+                        isEmailVerified = isVerified?.toString()?.toBooleanStrictOrNull() ?: false,
                         subscriptionType = SubscriptionType.FREE,
-                        createdAt = System.currentTimeMillis(),
-                        lastLoginAt = System.currentTimeMillis()
+                        createdAt = Clock.System.now().toEpochMilliseconds(),
+                        lastLoginAt = Clock.System.now().toEpochMilliseconds()
                     )
                     continuation.resume(Result.success(user))
                 } else {
@@ -39,8 +36,8 @@ class IosFirebaseAuth : FirebaseAuthInterface {
     }
 
     override suspend fun loginWithGoogle(idToken: String): Result<User> {
-        return suspendCoroutine { continuation ->
-            FirebaseAuthBridge().signInWithGoogle(idToken) { userId, userEmail, displayName, error ->
+        return suspendCancellableCoroutine { continuation ->
+            FirebaseAuthBridge().signInWithGoogle(idToken) { userId, userEmail, displayName, isVerified, error ->
                 if (error != null) {
                     continuation.resume(Result.failure(Exception(error)))
                 } else if (userId != null) {
@@ -48,10 +45,10 @@ class IosFirebaseAuth : FirebaseAuthInterface {
                         id = userId,
                         email = userEmail ?: "",
                         displayName = displayName,
-                        isEmailVerified = false,
+                        isEmailVerified = isVerified?.toString()?.toBooleanStrictOrNull() ?: false,
                         subscriptionType = SubscriptionType.FREE,
-                        createdAt = System.currentTimeMillis(),
-                        lastLoginAt = System.currentTimeMillis()
+                        createdAt = Clock.System.now().toEpochMilliseconds(),
+                        lastLoginAt = Clock.System.now().toEpochMilliseconds()
                     )
                     continuation.resume(Result.success(user))
                 } else {
@@ -62,11 +59,11 @@ class IosFirebaseAuth : FirebaseAuthInterface {
     }
 
     override suspend fun loginWithApple(idToken: String, nonce: String?): Result<User> {
-        return suspendCoroutine { continuation ->
+        return suspendCancellableCoroutine { continuation ->
             FirebaseAuthBridge().signInWithApple(
                 idToken = idToken,
                 nonce = nonce
-            ) { userId, userEmail, displayName, error ->
+            ) { userId, userEmail, displayName, isVerified, error ->
                 if (error != null) {
                     continuation.resume(Result.failure(Exception(error)))
                 } else if (userId != null) {
@@ -74,10 +71,10 @@ class IosFirebaseAuth : FirebaseAuthInterface {
                         id = userId,
                         email = userEmail ?: "",
                         displayName = displayName,
-                        isEmailVerified = false,
+                        isEmailVerified = isVerified?.toString()?.toBooleanStrictOrNull() ?: false,
                         subscriptionType = SubscriptionType.FREE,
-                        createdAt = System.currentTimeMillis(),
-                        lastLoginAt = System.currentTimeMillis()
+                        createdAt = Clock.System.now().toEpochMilliseconds(),
+                        lastLoginAt = Clock.System.now().toEpochMilliseconds()
                     )
                     continuation.resume(Result.success(user))
                 } else {
@@ -88,12 +85,12 @@ class IosFirebaseAuth : FirebaseAuthInterface {
     }
 
     override suspend fun register(email: String, password: String, displayName: String?): Result<User> {
-        return suspendCoroutine { continuation ->
+        return suspendCancellableCoroutine { continuation ->
             FirebaseAuthBridge().createUser(
                 email = email,
                 password = password,
                 displayName = displayName
-            ) { userId, userEmail, userDisplayName, error ->
+            ) { userId, userEmail, userDisplayName, isVerified, error ->
                 if (error != null) {
                     continuation.resume(Result.failure(Exception(error)))
                 } else if (userId != null) {
@@ -101,10 +98,10 @@ class IosFirebaseAuth : FirebaseAuthInterface {
                         id = userId,
                         email = userEmail ?: "",
                         displayName = userDisplayName,
-                        isEmailVerified = false,
+                        isEmailVerified = isVerified?.toString()?.toBooleanStrictOrNull() ?: false,
                         subscriptionType = SubscriptionType.FREE,
-                        createdAt = System.currentTimeMillis(),
-                        lastLoginAt = System.currentTimeMillis()
+                        createdAt = Clock.System.now().toEpochMilliseconds(),
+                        lastLoginAt = Clock.System.now().toEpochMilliseconds()
                     )
                     continuation.resume(Result.success(user))
                 } else {
@@ -127,15 +124,15 @@ class IosFirebaseAuth : FirebaseAuthInterface {
             id = userId,
             email = email,
             displayName = displayName,
-            isEmailVerified = FirebaseAuthBridge().isCurrentUserEmailVerified(),
+            isEmailVerified = FirebaseAuthBridge().isCurrentUserEmailVerified()?.toString()?.toBooleanStrictOrNull() ?: false,
             subscriptionType = SubscriptionType.FREE,
-            createdAt = 0,
-            lastLoginAt = 0
+            createdAt = Clock.System.now().toEpochMilliseconds(),
+            lastLoginAt = Clock.System.now().toEpochMilliseconds()
         )
     }
 
     override suspend fun deleteAccount(): Boolean {
-        return suspendCoroutine { continuation ->
+        return suspendCancellableCoroutine { continuation ->
             FirebaseAuthBridge().deleteAccount { success ->
                 continuation.resume(success)
             }
@@ -143,7 +140,7 @@ class IosFirebaseAuth : FirebaseAuthInterface {
     }
 
     override suspend fun sendPasswordResetEmail(email: String): Boolean {
-        return suspendCoroutine { continuation ->
+        return suspendCancellableCoroutine { continuation ->
             FirebaseAuthBridge().sendPasswordResetEmail(email) { success ->
                 continuation.resume(success)
             }
